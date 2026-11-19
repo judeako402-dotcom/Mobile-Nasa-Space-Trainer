@@ -16,6 +16,7 @@ import { TaskStation } from '../entities/TaskStation';
 import { FollowerCamera } from '../systems/FollowerCamera';
 import { InputSystem } from '../systems/InputSystem';
 import { InteractionSystem } from '../systems/InteractionSystem';
+import { touchControls } from '../systems/TouchControls';
 import {
   collectWalkableWaypoints,
   compressPath,
@@ -148,7 +149,7 @@ export class SurfaceScene extends Phaser.Scene implements StationControllableSce
       registerCharacterAnimations(this);
       this.blackoutElement = document.querySelector('#station-blackout');
 
-      this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width));
+      this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width, touchControls.enabled));
       this.cameras.main.setBackgroundColor('#080d18');
 
       // Re-fit the camera when the viewport changes (rotation, foldable,
@@ -158,12 +159,12 @@ export class SurfaceScene extends Phaser.Scene implements StationControllableSce
       this.tiledInput = new InputSystem(this);
       this.tiledInteraction.onSelectionChanged(() => this.emitPrompt(true));
 
-      // Tap / click the floor or a station marker to auto-walk there. The HUD
-      // and the virtual joystick sit above the canvas, so only bare world taps
-      // reach this handler.
+      // Desktop clicks and opted-in touch taps auto-walk. The HUD and joystick
+      // sit above the canvas, so only bare world taps reach this handler.
       this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
         if (!this.ready || this.state.frozen || this.state.blackout) return;
         if (pointer.button !== 0) return;
+        if (!touchControls.canTapToMove()) return;
         const world = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
         const target = this.nearestTapTarget(world.x, world.y);
         this.navigateTo(target.x, target.y);
@@ -412,14 +413,14 @@ export class SurfaceScene extends Phaser.Scene implements StationControllableSce
 
   /** Keep the adaptive framing in sync with viewport size changes. */
   private applyAdaptiveZoom(): void {
-    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width));
+    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width, touchControls.enabled));
   }
 
   private buildSurface(): void {
     this.teardown();
 
     this.cameras.main.setBackgroundColor('#080d18');
-    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width));
+    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width, touchControls.enabled));
 
     const loader = new MapLoader(this, MapKeys.station);
     this.tiledMap = loader.load({});

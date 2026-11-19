@@ -177,6 +177,10 @@ function renderOptionsContentMarkup(
             <summary>More settings</summary>
             <div class="design-extra-audio"></div>
             <label class="design-motion-setting">
+              <input type="checkbox" data-toggle-option="tapToMove" ${options.tapToMove ? 'checked' : ''} />
+              Tap to move on touch screens
+            </label>
+            <label class="design-motion-setting">
               <input type="checkbox" data-toggle-option="reducedMotion" ${options.reducedMotion ? 'checked' : ''} />
               Reduced motion
             </label>
@@ -294,6 +298,8 @@ export function showOptions(): void {
     }
     const motionSwitch = optionsRoot.querySelector<HTMLInputElement>('[data-toggle-option="reducedMotion"]');
     if (motionSwitch) motionSwitch.checked = currentOpts.reducedMotion;
+    const tapToMoveSwitch = optionsRoot.querySelector<HTMLInputElement>('[data-toggle-option="tapToMove"]');
+    if (tapToMoveSwitch) tapToMoveSwitch.checked = currentOpts.tapToMove;
     const fpsSwitch = optionsRoot.querySelector<HTMLInputElement>('[data-toggle-option="showFps"]');
     if (fpsSwitch) {
       const enabled = Boolean(currentOpts.showFps);
@@ -319,6 +325,13 @@ export function showOptions(): void {
   optionsRoot.querySelector<HTMLInputElement>('[data-toggle-option="showFps"]')?.addEventListener('change', (event) => {
     const target = event.currentTarget as HTMLInputElement;
     options.showFps = target.checked;
+    sfx.click();
+    refresh();
+  });
+
+  optionsRoot.querySelector<HTMLInputElement>('[data-toggle-option="tapToMove"]')?.addEventListener('change', (event) => {
+    const target = event.currentTarget as HTMLInputElement;
+    session.save.options.tapToMove = target.checked;
     sfx.click();
     refresh();
   });

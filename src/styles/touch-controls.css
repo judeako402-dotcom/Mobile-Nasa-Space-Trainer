@@ -20,6 +20,30 @@
   display: none;
 }
 
+html.touch-ui-compact {
+  font-size: 13px;
+}
+
+body[data-touch-controls] .ingame-options-screen .spud-arcade-settings-panel {
+  max-height: calc(100dvh - 20px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+body[data-touch-controls] .ingame-options-screen .design-motion-setting {
+  min-height: 44px;
+  margin-block: 4px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+body[data-touch-controls] .ingame-options-screen .design-motion-setting input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
 .touch-joystick {
   position: absolute;
   left: max(16px, env(safe-area-inset-left));
@@ -86,11 +110,10 @@
   box-shadow: 0 2px 8px rgba(2, 8, 18, 0.6);
 }
 
-/* The bottom-left profile plate grows taller as the viewport narrows, so lift
-   the joystick clear of it instead of letting them overlap. */
+/* Keep the joystick low in the left corner while clearing the profile plate. */
 @media (max-width: 740px) {
   .touch-joystick {
-    bottom: calc(max(6px, env(safe-area-inset-bottom)) + 176px);
+    bottom: calc(max(6px, env(safe-area-inset-bottom)) + 112px);
     width: clamp(104px, 30vmin, 136px);
   }
 }
@@ -99,7 +122,7 @@
    profile plate (bottom-left) and the mission panel rail (top-left). */
 @media (max-height: 520px) and (orientation: landscape) {
   .touch-joystick {
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 176px);
+    bottom: max(8px, env(safe-area-inset-bottom));
     width: clamp(92px, 34vh, 116px);
   }
 }
@@ -178,4 +201,526 @@ body[data-touch-controls] .mission-hud .toast.visible {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
+}
+
+body[data-touch-controls] button:hover:not(:disabled) {
+  transform: none;
+}
+
+body[data-touch-controls] .habitat-screen .spud-habitat-node:hover .spud-habitat-orb > img:not(.spud-orbit-ring),
+body[data-touch-controls] .habitat-choice:hover img {
+  transform: none;
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  body[data-touch-controls] .spud-arcade-settings-panel {
+    width: min(82vw, 700px);
+    max-height: calc(100dvh - 20px);
+    min-height: 0;
+    overflow-y: auto;
+    padding: 42px 16px 12px;
+  }
+
+  body[data-touch-controls] .spud-dialogue-arcade {
+    width: min(72vw, 560px);
+    max-height: calc(100dvh - 16px);
+    margin: 8px auto;
+    padding: 12px 14px 14px;
+    overflow-y: auto;
+    border-radius: 14px;
+  }
+
+  body[data-touch-controls] .spud-dialogue-arcade:has(.spud-dialogue-badge) {
+    padding-left: clamp(58px, 9vw, 78px);
+  }
+
+  body[data-touch-controls] .spud-dialogue-arcade.has-commander {
+    padding-left: clamp(72px, 11vw, 88px);
+  }
+
+  body[data-touch-controls] .spud-commander-model {
+    left: 8px;
+    width: clamp(52px, 8vw, 64px);
+  }
+
+  body[data-touch-controls] .spud-dialogue-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 44px;
+    margin: 0;
+    border-width: 2px;
+  }
+
+  body[data-touch-controls] .spud-dialogue-speaker {
+    font-size: 1rem;
+  }
+
+  body[data-touch-controls] .spud-dialogue-quote {
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  body[data-touch-controls] .spud-dialogue-rule {
+    margin: 6px 0 8px;
+  }
+
+  body[data-touch-controls] .spud-dialogue-arcade-footer {
+    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+  }
+
+  body[data-touch-controls] .spud-dialogue-key-prompt {
+    flex: 1 1 130px;
+    min-width: 0;
+    margin-inline-start: 0;
+    font-size: 10px;
+  }
+
+  body[data-touch-controls] .spud-dialogue-cta {
+    position: static;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: auto;
+    max-width: 100%;
+    min-width: 116px;
+    min-inline-size: 116px;
+    max-inline-size: 100%;
+    min-height: 44px;
+    height: 44px;
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+
+  body[data-touch-controls] .spud-dialogue-cta[aria-label="Close dialogue"] {
+    flex-basis: auto;
+    width: clamp(124px, 16vw, 144px);
+    min-width: 124px;
+    min-inline-size: 124px;
+    height: auto;
+    aspect-ratio: 380 / 135;
+    padding: 0;
+  }
+
+  body[data-touch-controls] .spud-dialogue-cta:active:not(:disabled) {
+    transform: none;
+  }
+
+  body[data-touch-controls] .spud-dialogue-dismiss {
+    width: 44px;
+    height: 44px;
+  }
+
+  body[data-touch-controls] .spud-canvas-inner {
+    width: min(86vw, 760px);
+    max-height: calc(100dvh - 20px);
+    overflow-y: auto;
+    gap: 8px;
+  }
+
+  body[data-touch-controls] .shift-planner.spud-canvas-overlay {
+    overflow: hidden;
+    padding: 6px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-frame {
+    width: min(80vw, 740px);
+    height: min(84dvh, 520px);
+    min-height: 0;
+    max-height: calc(100dvh - 16px);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 2px;
+    padding: 8px;
+    border-width: 5px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-comic-heading.is-page {
+    font-size: clamp(18px, 2.1vw, 28px);
+  }
+
+  body[data-touch-controls] .shift-planner-layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 6px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-left-panel,
+  body[data-touch-controls] .shift-planner .shift-planner-right-panel {
+    min-height: 0;
+    gap: 6px;
+    padding: 7px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-left-panel {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-task-visual {
+    display: none;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-offers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(44px, 1fr));
+    grid-auto-flow: row;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-offer {
+    grid-template-columns: 16px minmax(0, 1fr) 10px;
+    min-height: 44px;
+    gap: 4px;
+    padding: 2px 4px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-offer > img {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-offer-info {
+    gap: 1px;
+    min-width: 0;
+    font-size: 9px;
+    line-height: 1.15;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-offer-info strong {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-offer-info small {
+    overflow: hidden;
+    font-size: 7px;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body[data-touch-controls] .shift-planner .offer-exchange {
+    display: none;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-focused-bars {
+    display: none;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 2px 8px;
+    padding: 2px 6px;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card > .spud-copy-block {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    gap: 2px;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card .hud-event-kicker {
+    display: none;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card > .spud-event-responses,
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card > small,
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card > div[style*="display:flex"] {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-event-impact {
+    display: none !important;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card[data-event-kind="routine"] > small {
+    display: none;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card #shift-event-title {
+    font-size: 11px;
+    margin: 1px 0;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card .spud-copy-block p {
+    font-size: 10px;
+    line-height: 1.25;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card > .spud-constellation-kicker {
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-event-responses {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-planning-hazard-card .event-response {
+    min-height: 44px;
+    padding: 4px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-right-panel {
+    grid-template-rows: minmax(0, 0.85fr) auto minmax(0, 1.15fr);
+    gap: 4px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-right-panel > .spud-copy-block {
+    gap: 3px;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-preview-title {
+    font-size: 16px;
+    line-height: 1.1;
+    text-shadow: none;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-preview-description {
+    font-size: 10px;
+    line-height: 1.25;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-preview-effects {
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-forecast-heading {
+    gap: 2px 4px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-forecast-heading small {
+    font-size: 8px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-planner-gauges {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-gauge {
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    grid-template-rows: 10px 9px;
+    align-items: center;
+    justify-items: stretch;
+    gap: 1px 3px;
+    padding: 2px 3px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-gauge-icon-wrap {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: 14px;
+    height: 18px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-gauge-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-gauge-pill {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    width: 100%;
+    height: 9px;
+    border-radius: 999px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-gauge-fill {
+    inset: 0 auto 0 0;
+    width: var(--projected-value);
+    height: 100% !important;
+    min-height: 0;
+    border-radius: inherit;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-gauge-pct {
+    font-size: 7px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-gauge-name {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    font-size: 7px;
+  }
+
+  body[data-touch-controls] .shift-planner .shift-gauge b {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    font-size: 7px;
+    white-space: nowrap;
+  }
+
+  body[data-touch-controls] .shift-planner [data-planning-confirm] {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    min-width: 0;
+    min-height: 44px;
+    width: auto;
+    height: 44px;
+    padding-inline: 12px;
+    font-size: 0.78rem;
+  }
+
+  body[data-touch-controls] .shift-planner .spud-constellation-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 8px;
+    padding-top: 4px;
+  }
+
+  body[data-touch-controls] .shift-planner #planning-instruction {
+    display: none;
+  }
+
+  body[data-touch-controls] .spud-console-tablet,
+  body[data-touch-controls] .task-result-card,
+  body[data-touch-controls] .disaster-card {
+    width: min(78vw, 640px);
+    max-height: calc(100dvh - 20px);
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  body[data-touch-controls] .spud-console-tablet .task-body.spud-console-stage {
+    padding: 9px;
+  }
+
+  body[data-touch-controls] .spud-console-tablet .spud-modal-top {
+    gap: 6px;
+    padding-bottom: 7px;
+    margin-bottom: 6px;
+  }
+
+  body[data-touch-controls] .disaster-card .disaster-warning {
+    gap: 8px;
+  }
+
+  body[data-touch-controls] .disaster-card .disaster-warning > span {
+    font-size: 30px;
+  }
+
+  body[data-touch-controls] .disaster-card .disaster-tool-art {
+    width: 48px;
+  }
+
+  body[data-touch-controls] .game-menu-dialog {
+    width: min(84vw, 740px);
+    max-height: calc(100dvh - 16px);
+  }
+
+  body[data-touch-controls] .game-menu-dialog .game-menu-header {
+    padding: 8px 10px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-drawer-panel {
+    width: min(340px, calc(100vw - var(--hud-drawer-left) - max(var(--hud-edge), env(safe-area-inset-right))));
+    padding: 8px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-quick-tasks {
+    font-size: 10px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-quick-tasks button {
+    min-height: 44px;
+  }
+
+  body[data-touch-controls] .mission-hud .mission-status {
+    padding: 4px 5px;
+    font-size: 10px;
+  }
+
+  .launch-screen .spud-canvas-inner {
+    width: min(94vw, 820px);
+    max-height: calc(100dvh - 12px);
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .launch-screen .spud-flight-check-showcase {
+    grid-template-columns: minmax(140px, 0.8fr) minmax(0, 2fr);
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  .launch-screen .spud-flight-visual-card {
+    min-height: 160px;
+    border-radius: 12px;
+  }
+
+  .launch-screen .spud-flight-crew-chamber {
+    min-height: 0;
+  }
+
+  .launch-screen .spud-flight-crew-chamber .spud-sprite-stage {
+    --sprite-h: clamp(96px, 26vh, 128px);
+    height: var(--sprite-h);
+  }
+
+  .launch-screen .spud-flight-details-card {
+    min-width: 0;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .launch-screen .spud-telemetry-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .launch-screen .spud-telemetry-cell {
+    gap: 3px;
+    padding: 5px 4px;
+  }
+
+  .launch-screen .spud-telemetry-cell span {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .launch-screen .spud-telemetry-cell strong {
+    font-size: 13px;
+    line-height: 1.15;
+  }
+
+  .launch-screen .spud-telemetry-cell small {
+    font-size: 9px;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+  }
+
+  .launch-screen .spud-check-card-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .launch-screen .spud-flight-cta-row {
+    padding-top: 2px;
+  }
+
+  .launch-screen [data-launch-begin] {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+  }
 }

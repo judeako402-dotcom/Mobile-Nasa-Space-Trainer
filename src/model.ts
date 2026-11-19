@@ -161,6 +161,7 @@ export interface GameOptions {
   lineOfSight: boolean;
   reducedMotion: boolean;
   showFps: boolean;
+  tapToMove: boolean;
   difficulty: DifficultyId;
 }
 
@@ -423,6 +424,7 @@ export const DEFAULT_OPTIONS: GameOptions = {
   lineOfSight: true,
   reducedMotion: false,
   showFps: false,
+  tapToMove: false,
   difficulty: 'crew',
 };
 
@@ -676,6 +678,7 @@ function parseSaveRecord(parsed: unknown): PlayerSave {
       lineOfSight: typeof options.lineOfSight === 'boolean' ? options.lineOfSight : fallback.options.lineOfSight,
       reducedMotion: typeof options.reducedMotion === 'boolean' ? options.reducedMotion : fallback.options.reducedMotion,
       showFps: typeof options.showFps === 'boolean' ? options.showFps : fallback.options.showFps,
+      tapToMove: typeof options.tapToMove === 'boolean' ? options.tapToMove : fallback.options.tapToMove,
       difficulty,
     },
   };

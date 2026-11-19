@@ -2557,3 +2557,155 @@ dialog.spud-arcade-confirm.is-restart-mockup::before {
     width: 100%;
   }
 }
+
+@media (max-height: 560px) and (orientation: landscape) {
+  body[data-touch-controls] .mission-hud .hud-top-left {
+    max-width: min(220px, 30vw);
+  }
+
+  body[data-touch-controls] .mission-hud .hud-task-card {
+    padding: 5px 7px;
+    border-width: 1px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-task-card-row {
+    margin-bottom: 3px;
+    gap: 4px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-task-eyebrow {
+    font-size: 9px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-task-track {
+    height: 4px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-left-rail {
+    position: relative;
+    inset: auto;
+    left: auto;
+    top: auto;
+    flex-direction: row;
+    gap: 4px;
+    width: auto;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-drawer-tab {
+    flex-direction: row;
+    width: auto;
+    min-width: 68px;
+    min-height: 44px;
+    gap: 4px;
+    padding: 4px 6px;
+    border-width: 1px;
+    border-radius: 7px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-drawer-tab kbd {
+    display: none;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-tab-label {
+    font-size: 9px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-glyph--rail {
+    width: 18px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-top-right {
+    gap: 4px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-settings-btn {
+    width: 38px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-radar {
+    width: clamp(62px, 16vh, 74px);
+  }
+
+  body[data-touch-controls] .mission-hud .hud-map-caption {
+    gap: 4px;
+    padding: 2px 5px;
+    font-size: 9px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-bottom-left {
+    top: var(--hud-top);
+    bottom: auto;
+    left: var(--hud-left);
+    width: clamp(120px, 16vw, 140px);
+  }
+
+  body[data-touch-controls] .mission-hud .hud-helmet-btn {
+    top: 48%;
+    min-height: 24px;
+    padding: 2px 4px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-top-left {
+    top: calc(var(--hud-top) + 60px);
+  }
+
+  body[data-touch-controls] .mission-hud .action-button.use {
+    width: 52px;
+  }
+
+  body[data-touch-controls] .mission-hud .action-button.use .hud-glyph {
+    width: 20px;
+    height: 20px;
+  }
+
+  body[data-touch-controls] .camera-cluster {
+    bottom: calc(var(--hud-bottom) + 72px);
+    flex-direction: row;
+    gap: 6px;
+    padding: 4px;
+    border: 1px solid rgba(140, 245, 237, 0.28);
+    border-radius: 11px;
+    background: rgba(8, 14, 34, 0.78);
+    backdrop-filter: blur(8px);
+  }
+
+  body[data-touch-controls] .camera-button {
+    min-height: 48px;
+    padding: 5px 6px;
+    font-size: 9px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-drawer-panel {
+    width: min(420px, calc(100vw - var(--hud-drawer-left) - max(var(--hud-edge), env(safe-area-inset-right))));
+    max-height: calc(100dvh - var(--hud-top) - var(--hud-bottom) - 12px);
+    padding: 8px;
+    border-width: 2px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-drawer-title img {
+    width: clamp(84px, 15vh, 112px);
+  }
+
+  body[data-touch-controls] .mission-hud .hud-tasks-grid {
+    gap: 4px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-task-card-item {
+    gap: 2px 6px;
+    padding: 5px 7px;
+    border-width: 1px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-task-item-title {
+    font-size: 12px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-task-item-desc {
+    font-size: 10px;
+  }
+
+  body[data-touch-controls] .mission-hud .hud-task-item-status {
+    padding: 3px;
+    font-size: 9px;
+  }
+}

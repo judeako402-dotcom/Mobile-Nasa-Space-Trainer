@@ -26,10 +26,11 @@ export const CAMERA = {
   smoothing: 11,
 } as const;
 
-/** Keep enough world visible on phones without widening the desktop framing. */
-export function cameraZoomForViewport(viewWidth: number): number {
+/** Preserve desktop framing while showing more of the station on touch devices. */
+export function cameraZoomForViewport(viewWidth: number, touchDevice = false): number {
   if (!Number.isFinite(viewWidth) || viewWidth <= 0) return CAMERA.zoom;
-  return Math.min(CAMERA.zoom, Math.max(0.55, Math.min(1, viewWidth / 900)));
+  const widthForFullZoom = touchDevice ? 1600 : 900;
+  return Math.min(CAMERA.zoom, Math.max(0.48, Math.min(1, viewWidth / widthForFullZoom)));
 }
 
 export const VISION = {

@@ -87,7 +87,7 @@ export class TrainingScene extends Phaser.Scene implements StationControllableSc
   create(): void {
     registerCharacterAnimations(this);
 
-    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width));
+    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width, touchControls.enabled));
     this.cameras.main.setBackgroundColor('#03060c');
 
     // Re-fit the camera when the viewport changes (rotation, foldable, split
@@ -104,11 +104,12 @@ export class TrainingScene extends Phaser.Scene implements StationControllableSc
       this.tryInteract();
     });
 
-    // Tap / click the deck to walk. `#touch-controls` and the HUD sit above the
-    // canvas, so only bare floor taps ever reach this handler.
+    // Desktop clicks and opted-in touch floor taps walk. The controls and HUD
+    // sit above the canvas, so only bare floor taps reach this handler.
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if (!this.ready || this.state.frozen || this.transitionActive) return;
       if (pointer.button !== 0) return;
+      if (!touchControls.canTapToMove()) return;
       const world = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
       this.navigateTo(world.x, world.y);
     });
@@ -322,7 +323,7 @@ export class TrainingScene extends Phaser.Scene implements StationControllableSc
 
   /** Keep the adaptive framing in sync with viewport size changes. */
   private applyAdaptiveZoom(): void {
-    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width));
+    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width, touchControls.enabled));
   }
 
   private updateCamera(x: number, y: number, delta: number): void {
@@ -443,7 +444,7 @@ export class TrainingScene extends Phaser.Scene implements StationControllableSc
   private buildMap(): void {
     this.teardown();
     this.cameras.main.setBackgroundColor('#03060c');
-    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width));
+    this.cameras.main.setZoom(cameraZoomForViewport(this.cameras.main.width, touchControls.enabled));
 
     this.geometry = new MapGeometry(this.map, MOVEMENT.bodyHalfWidth, MOVEMENT.bodyHalfHeight, 25);
     this.mapLayer = this.add.container(0, 0).setDepth(0);

@@ -305,11 +305,11 @@ async function launchChromePass({ autoplayAllowed, viewport }) {
   }
 }
 
-async function clickSelector(cdp, selector) {
+async function clickSelector(cdp, selector, scrollIntoView = true) {
   const rect = await cdp.eval(`(() => {
     const el = document.querySelector(${JSON.stringify(selector)});
     if (!el || el.hidden || el.disabled) return null;
-    el.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
+    if (${scrollIntoView}) el.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
     const r = el.getBoundingClientRect();
     const x = r.left + r.width / 2;
     const y = r.top + r.height / 2;
@@ -321,7 +321,7 @@ async function clickSelector(cdp, selector) {
     };
   })()`);
   assert(rect && rect.w > 0 && rect.h > 0, `Expected visible clickable selector: ${selector}`);
-  assert(rect.receivesPointer, `Expected ${selector} to receive pointer events at its center, hit=${rect.hit}`);
+  assert(rect.receivesPointer, `Expected ${selector} to receive pointer events at its center (${rect.x}, ${rect.y}), hit=${rect.hit}`);
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: rect.x, y: rect.y });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: rect.x, y: rect.y, button: 'left', clickCount: 1 });
@@ -679,6 +679,46 @@ async function runPass1() {
       return txt.includes('7 SHIFTS') && txt.includes('Cadet') && txt.includes('The Moon') ? { ok: true } : null;
     })()`), 'Launch check displays 7 SHIFTS, Cadet difficulty and The Moon destination');
     console.log('Moon habitat & Cadet Flight Check verified:', { moonHero, launchSummary });
+    await cdp.send('Emulation.setDeviceMetricsOverride', {
+      width: 844,
+      height: 390,
+      deviceScaleFactor: 2,
+      mobile: true,
+    });
+    await sleep(250);
+    const flightLayout = await cdp.eval(`(() => {
+      const rect = selector => document.querySelector(selector)?.getBoundingClientRect();
+      const showcase = rect('.spud-flight-check-showcase');
+      const visual = rect('.spud-flight-visual-card');
+      const details = rect('.spud-flight-details-card');
+      const cells = Array.from(document.querySelectorAll('.launch-screen .spud-telemetry-cell'));
+      const cta = rect('[data-launch-begin]');
+      return {
+        gridColumns: showcase ? getComputedStyle(document.querySelector('.spud-flight-check-showcase')).gridTemplateColumns : '',
+        visualRight: visual?.right ?? 0,
+        detailsLeft: details?.left ?? 0,
+        sideBySide: Boolean(visual && details && visual.right <= details.left + 1),
+        cellCount: cells.length,
+        cellBounds: cells.map(cell => {
+          const box = cell.getBoundingClientRect();
+          return { width: box.width, top: box.top, bottom: box.bottom };
+        }),
+        allFlightInfoVisible: cells.length === 3 && cells.every(cell => {
+          const box = cell.getBoundingClientRect();
+          return box.width > 0 && box.height > 0 && box.top >= 0 && box.bottom <= innerHeight + 2;
+        }),
+        ctaHeight: cta?.height ?? 0,
+        landscapeLayout: matchMedia('(orientation: landscape) and (max-height: 560px)').matches,
+        noHorizontalOverflow: document.documentElement.scrollWidth <= innerWidth + 2,
+      };
+    })()`);
+    assert(flightLayout.sideBySide,
+      `short-landscape final flight check keeps the crew and telemetry side by side: ${JSON.stringify(flightLayout)}`);
+    assert(flightLayout.allFlightInfoVisible,
+      `short-landscape final flight check keeps all three telemetry cards visible: ${JSON.stringify(flightLayout)}`);
+    assert(flightLayout.ctaHeight >= 44 && flightLayout.noHorizontalOverflow,
+      'short-landscape final flight check preserves the launch touch target without horizontal overflow');
+    console.log('Compact landscape Flight Check layout verified.');
 
     assertErrorsClean(errors, 'Pass 1B');
   } finally {
@@ -827,6 +867,27 @@ async function enterMissionDay01(cdp, specialist = 'repairman', options = {}) {
   await waitFor(() => cdp.eval(`document.body.dataset.screen === 'play-intro' && Boolean(document.querySelector('.intro-skip'))`), 'play intro video');
   await cdp.eval(`document.querySelector('.intro-skip').click()`);
   await waitFor(() => cdp.eval(`document.body.dataset.screen === 'lobby' && Boolean(document.querySelector('[data-specialist]'))`), 'lobby');
+  if (await cdp.eval(`matchMedia('(pointer: coarse)').matches`)) {
+    const testSpecialist = specialist === 'farmer' ? 'researcher' : 'farmer';
+    const selector = `.spud-class-pill[data-specialist="${testSpecialist}"]`;
+    const before = await cdp.eval(`(() => {
+      const pill = document.querySelector(${JSON.stringify(selector)});
+      const rect = pill?.getBoundingClientRect();
+      return pill && rect ? { width: rect.width, height: rect.height, display: getComputedStyle(pill).display } : null;
+    })()`);
+    assert(before && before.display !== 'none' && before.width >= 44 && before.height >= 44,
+      'touch class buttons start visible with usable targets');
+    await clickSelector(cdp, selector);
+    await waitFor(() => cdp.eval(`document.querySelector(${JSON.stringify(selector)})?.getAttribute('aria-pressed') === 'true'`),
+      'touch class button selection');
+    const after = await cdp.eval(`(() => {
+      const pill = document.querySelector(${JSON.stringify(selector)});
+      const rect = pill?.getBoundingClientRect();
+      return pill && rect ? { width: rect.width, height: rect.height, display: getComputedStyle(pill).display } : null;
+    })()`);
+    assert(after && after.display !== 'none' && after.width >= 44 && after.height >= 44,
+      'touch class buttons remain visible after selection');
+  }
   const specialistOrder = ['repairman', 'farmer', 'researcher'];
   const active = await cdp.eval(`document.querySelector('[data-specialist][aria-pressed=true]').dataset.specialist`);
   const steps = (specialistOrder.indexOf(specialist) - specialistOrder.indexOf(active) + specialistOrder.length) % specialistOrder.length;
@@ -882,6 +943,47 @@ async function enterMissionDay01(cdp, specialist = 'repairman', options = {}) {
       .includes('Drag the joystick') && document.querySelector('#modal-root .dialogue-line')?.textContent.includes('tap USE')`),
     'touch opening briefing explains joystick movement and USE');
   }
+  if (options.assertLandscapeDialogueLayout) {
+    await cdp.send('Emulation.setDeviceMetricsOverride', {
+      width: 844,
+      height: 390,
+      deviceScaleFactor: 2,
+      mobile: true,
+    });
+    await sleep(250);
+    const commanderLayout = await cdp.eval(`(() => {
+      const rect = selector => document.querySelector(selector)?.getBoundingClientRect();
+      const portrait = rect('.spud-commander-model');
+      const line = rect('.has-commander .dialogue-line');
+      const buttonElement = document.querySelector('.has-commander [data-dialogue-next]');
+      const button = buttonElement?.getBoundingClientRect();
+      const hit = button && document.elementFromPoint(button.left + button.width / 2, button.top + button.height / 2);
+      const overlap = portrait && line
+        && portrait.left < line.right && portrait.right > line.left
+        && portrait.top < line.bottom && portrait.bottom > line.top;
+      return {
+        overlap: Boolean(overlap),
+        buttonWidth: button?.width ?? 0,
+        buttonHeight: button?.height ?? 0,
+        buttonAspect: button ? button.width / button.height : 0,
+        buttonIsSprite: buttonElement?.getAttribute('aria-label') === 'Close dialogue',
+        buttonFits: Boolean(buttonElement && buttonElement.scrollWidth <= buttonElement.clientWidth + 2),
+        buttonHit: Boolean(buttonElement && (hit === buttonElement || buttonElement.contains(hit))),
+      };
+    })()`);
+    assert(!commanderLayout.overlap, 'short-landscape Commander portrait does not cover dialogue text');
+    assert(commanderLayout.buttonWidth >= 116 && commanderLayout.buttonHeight >= 44
+      && commanderLayout.buttonIsSprite && commanderLayout.buttonAspect >= 2.6
+      && commanderLayout.buttonAspect <= 3 && commanderLayout.buttonFits && commanderLayout.buttonHit,
+    `short-landscape Continue control keeps a stable, tappable shape: ${JSON.stringify(commanderLayout)}`);
+    await cdp.send('Emulation.setDeviceMetricsOverride', {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 2,
+      mobile: true,
+    });
+    await sleep(250);
+  }
   assert(await cdp.eval(`window.__spudTelemetry().guide === null && document.querySelector('#hud-special-alert').hidden`),
     'opening blackout has neither a path line nor an emergency warning');
   await cdp.eval(`document.querySelector('.has-commander [data-dialogue-next]').click()`);
@@ -910,6 +1012,94 @@ async function enterMissionDay01(cdp, specialist = 'repairman', options = {}) {
   }
   await cdp.eval(`document.querySelector('.has-commander [data-dialogue-next]').click()`);
   await waitFor(() => cdp.eval(`Boolean(document.querySelector('.shift-planner[open]:not([inert])'))`), 'day 01 shift planner');
+  if (options.assertLandscapePlannerLayout) {
+    for (const viewport of [{ width: 844, height: 390 }, { width: 667, height: 375 }]) {
+      await cdp.send('Emulation.setDeviceMetricsOverride', {
+        ...viewport,
+        deviceScaleFactor: 2,
+        mobile: true,
+      });
+      await sleep(250);
+      assert(await cdp.eval(`document.documentElement.scrollWidth <= innerWidth + 2`),
+        `Shift Planner has no horizontal overflow at ${viewport.width}x${viewport.height}`);
+      const plannerLayout = await cdp.eval(`(() => {
+        const rect = selector => document.querySelector(selector)?.getBoundingClientRect();
+        const frame = rect('.shift-planner-frame');
+        const left = rect('.shift-planner-left-panel');
+        const right = rect('.shift-planner-right-panel');
+        const offerList = document.querySelector('.shift-planner .shift-offers');
+        const offers = Array.from(document.querySelectorAll('.shift-planner [data-offer]'));
+        const offerRects = offers.map(button => button.getBoundingClientRect());
+        const listRect = offerList.getBoundingClientRect();
+        const gauge = rect('.shift-planner .shift-gauge-pill');
+        const separated = left && right && left.right <= right.left + 1;
+        const offersVisible = offerRects.length === 5 && offerRects.every(button =>
+          button.width >= 44 && button.height >= 44
+          && button.left >= listRect.left - 1 && button.right <= listRect.right + 1
+          && button.top >= listRect.top - 1 && button.bottom <= listRect.bottom + 1
+          && button.left >= 0 && button.right <= innerWidth
+          && button.top >= 0 && button.bottom <= innerHeight);
+        const offerTargetsWork = offerRects.every((button, index) => {
+          const target = document.elementFromPoint(
+            button.left + button.width / 2,
+            button.top + button.height / 2,
+          );
+          return target?.closest('[data-offer]') === offers[index];
+        });
+        const rightPanel = document.querySelector('.shift-planner-right-panel');
+        const inspector = document.querySelector('#planning-offer-inspector');
+        const frameElement = document.querySelector('.shift-planner-frame');
+        return {
+          frameFits: Boolean(frame && frame.left >= 0 && frame.top >= 0
+            && frame.right <= innerWidth + 2 && frame.bottom <= innerHeight + 2),
+          panelsSeparated: Boolean(separated),
+          offerCount: offers.length,
+          offersVisible,
+          offerTargetsWork,
+          offersScroll: offerList.scrollHeight - offerList.clientHeight,
+          offerListHeight: offerList.clientHeight,
+          offerHeights: offerRects.map(button => button.height),
+          detailsScroll: rightPanel.scrollHeight - rightPanel.clientHeight,
+          previewScroll: inspector.scrollHeight - inspector.clientHeight,
+          frameScroll: frameElement.scrollHeight - frameElement.clientHeight,
+          sections: Object.fromEntries([
+            '.spud-options-header',
+            '.spud-planning-hazard-card',
+            '.shift-planner-layout',
+            '.shift-planner-left-panel',
+            '.shift-planner-right-panel',
+            '.shift-planner-footer',
+          ].map(selector => [selector, rect(selector)?.toJSON()])),
+          offerIconVisible: getComputedStyle(document.querySelector('.shift-planner [data-offer] img')).display !== 'none',
+          duplicatePreviewHidden: getComputedStyle(document.querySelector('.shift-planner-task-visual')).display === 'none',
+          previewTitleSize: parseFloat(getComputedStyle(document.querySelector('.shift-planner-preview-title')).fontSize),
+          descriptionSize: parseFloat(getComputedStyle(document.querySelector('.shift-planner-preview-description')).fontSize),
+          gaugeHeight: gauge?.height ?? 0,
+          frameWidthRatio: frame?.width / innerWidth,
+          frameHeightRatio: frame?.height / innerHeight,
+        };
+      })()`);
+      assert(plannerLayout.frameFits && plannerLayout.panelsSeparated,
+        `short-landscape planning keeps its two information panels inside ${viewport.width}x${viewport.height}: ${JSON.stringify(plannerLayout)}`);
+      assert(plannerLayout.offerCount === 5 && plannerLayout.offersVisible && plannerLayout.offerTargetsWork,
+      `all five planning tasks fit and remain directly touchable at ${viewport.width}x${viewport.height}: ${JSON.stringify(plannerLayout)}`);
+      assert(plannerLayout.offerIconVisible && plannerLayout.duplicatePreviewHidden,
+        `short-landscape assignment cards remain recognizable at ${viewport.width}x${viewport.height}: ${JSON.stringify(plannerLayout)}`);
+      assert(plannerLayout.previewTitleSize >= 15 && plannerLayout.descriptionSize >= 10
+        && plannerLayout.gaugeHeight >= 8 && plannerLayout.gaugeHeight <= 12,
+      `short-landscape planning preserves readable details and compact forecast gauges at ${viewport.width}x${viewport.height}: ${JSON.stringify(plannerLayout)}`);
+      assert(plannerLayout.detailsScroll <= 1 && plannerLayout.previewScroll <= 1
+        && plannerLayout.frameScroll <= 1,
+      `planning details fit without scrolling at ${viewport.width}x${viewport.height}: ${JSON.stringify(plannerLayout)}`);
+    }
+    await cdp.send('Emulation.setDeviceMetricsOverride', {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 2,
+      mobile: true,
+    });
+    await sleep(250);
+  }
   const layout = await cdp.eval(`(() => {
     const rect = selector => document.querySelector(selector).getBoundingClientRect().toJSON();
     return {
@@ -1522,6 +1712,8 @@ async function runPass3() {
       difficulty: 'crew',
       skipTutorial: true,
       assertTouchGuidance: true,
+      assertLandscapeDialogueLayout: true,
+      assertLandscapePlannerLayout: true,
     });
     await assertNoHorizontalOverflow('Mission HUD 390x844');
     assert(await cdp.eval(`document.body.hasAttribute('data-touch-controls')
@@ -1533,7 +1725,11 @@ async function runPass3() {
       return use && camera && (use.bottom <= camera.top || camera.bottom <= use.top);
     })()`), 'mobile USE button does not overlap camera cluster');
 
-    for (const viewport of [{ width: 320, height: 640 }, { width: 430, height: 932 }]) {
+    for (const viewport of [
+      { width: 320, height: 640 },
+      { width: 430, height: 932 },
+      { width: 844, height: 390 },
+    ]) {
       await cdp.send('Emulation.setDeviceMetricsOverride', {
         ...viewport,
         deviceScaleFactor: 2,
@@ -1549,6 +1745,45 @@ async function runPass3() {
         const separate = (a, b) => a && b && (a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
         return separate(use, camera) && separate(pad, profile);
       })()`), `mission controls clear each other at ${viewport.width}x${viewport.height}`);
+      assert(await cdp.eval(`(() => {
+        const use = document.querySelector('.mission-hud .action-button.use');
+        if (!use) return false;
+        const rect = use.getBoundingClientRect();
+        const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        return hit === use || use.contains(hit);
+      })()`), `USE remains tappable at ${viewport.width}x${viewport.height}`);
+      if (viewport.height < viewport.width) {
+        assert(await cdp.eval(`(() => {
+          const pad = document.querySelector('#touch-joystick')?.getBoundingClientRect();
+          const profile = document.querySelector('.mission-hud .hud-bottom-left')?.getBoundingClientRect();
+          return pad && profile && pad.left <= 16 && pad.bottom >= innerHeight - 12
+            && profile.left <= 16 && profile.top <= 16 && profile.width <= 144;
+        })()`), 'landscape joystick is bottom-left and compact profile is top-left');
+        assert(await cdp.eval(`(() => {
+          const tabs = Array.from(document.querySelectorAll('.mission-hud .hud-drawer-tab'));
+          return tabs.length === 2 && tabs.every(tab => {
+            const rect = tab.getBoundingClientRect();
+            return rect.width <= 80 && rect.height >= 44;
+          });
+        })()`), 'landscape Tasks and Status tabs stay compact with full-size touch targets');
+        const helmetState = await cdp.eval(`(() => {
+          const button = document.querySelector('#hud-helmet-btn');
+          const rect = button?.getBoundingClientRect();
+          const hit = rect && document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+          return button && rect && !button.hidden
+            ? { pressed: button.getAttribute('aria-pressed'), hit: hit === button || button.contains(hit) }
+            : null;
+        })()`);
+        assert(helmetState?.hit, 'landscape EVA helmet button remains an active touch target');
+        await clickSelector(cdp, '#hud-helmet-btn');
+        await waitFor(() => cdp.eval(`document.querySelector('#hud-helmet-btn')?.getAttribute('aria-pressed') !== ${JSON.stringify(helmetState.pressed)}`),
+          'touch EVA helmet toggles');
+        await clickSelector(cdp, '#hud-helmet-btn');
+        await waitFor(() => cdp.eval(`document.querySelector('#hud-helmet-btn')?.getAttribute('aria-pressed') === ${JSON.stringify(helmetState.pressed)}`),
+          'touch EVA helmet restores previous state');
+        assert(await cdp.eval(`document.documentElement.classList.contains('touch-ui-compact')
+          && getComputedStyle(document.documentElement).fontSize === '13px'`), 'landscape touch UI uses the compact type scale');
+      }
     }
     await cdp.send('Emulation.setDeviceMetricsOverride', {
       width: 390,
@@ -1595,6 +1830,27 @@ async function runPass3() {
     await assertNoHorizontalOverflow('Options 390x844');
     assert(await cdp.eval(`!document.querySelector('#scene-shell').hidden && document.querySelector('#hud').hidden
       && Boolean(document.querySelector('.ingame-options-screen #opt-volume'))`), 'settings overlay preserves the scene and exposes SFX');
+    if (!await cdp.eval(`document.querySelector('.design-extra-settings')?.open`)) {
+      await clickSelector(cdp, '.design-extra-settings summary');
+    }
+    await waitFor(() => cdp.eval(`document.querySelector('.design-extra-settings')?.open`),
+      'extra settings expanded');
+    await sleep(250);
+    assert(await cdp.eval(`document.querySelector('[data-toggle-option="tapToMove"]')?.checked === false`),
+      'touch tap-to-move is off by default in Settings');
+    await waitFor(() => cdp.eval(`(() => {
+      const label = document.querySelector('.design-motion-setting:has([data-toggle-option="tapToMove"])');
+      const rect = label?.getBoundingClientRect();
+      const hit = rect && document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return rect && rect.height >= 44 && getComputedStyle(label).visibility === 'visible'
+        && hit?.closest('.design-motion-setting') === label;
+    })()`), 'tap-to-move setting visible');
+    await clickSelector(cdp, '.design-motion-setting:has([data-toggle-option="tapToMove"])', false);
+    assert(await cdp.eval(`document.querySelector('[data-toggle-option="tapToMove"]')?.checked === true`),
+      'touch tap-to-move can be enabled in Settings');
+    await clickSelector(cdp, '.design-motion-setting:has([data-toggle-option="tapToMove"])', false);
+    assert(await cdp.eval(`document.querySelector('[data-toggle-option="tapToMove"]')?.checked === false`),
+      'touch tap-to-move can be disabled again');
     await clickSelector(cdp, '[data-game-return]');
     await waitFor(() => cdp.eval(`!document.querySelector('#hud').hidden && !window.__spudTelemetry?.()?.frozen`), 'mobile resumes gameplay');
     await clickSelector(cdp, '[data-action="options"]');
@@ -1657,6 +1913,9 @@ async function runPass3() {
         pad: pad.toJSON(),
         rail: rail.toJSON(),
         verticalOverlap: pad.bottom > rail.top && rail.bottom > pad.top,
+        verticalGap: pad.bottom <= rail.top ? rail.top - pad.bottom
+          : rail.bottom <= pad.top ? pad.top - rail.bottom
+            : -Math.min(pad.bottom - rail.top, rail.bottom - pad.top),
         horizontalGap: pad.right <= rail.left ? rail.left - pad.right
           : rail.right <= pad.left ? pad.left - rail.right
             : -Math.min(pad.right - rail.left, rail.right - pad.left),
@@ -1665,8 +1924,9 @@ async function runPass3() {
         joystickWidth: getComputedStyle(document.querySelector('#touch-joystick')).width,
       } : null;
     })()`);
-    assert(landscapeRailGeometry?.verticalOverlap && landscapeRailGeometry.horizontalGap >= 16,
-      `landscape joystick needs at least 16px clearance from mission rail: ${JSON.stringify(landscapeRailGeometry)}`);
+    assert(landscapeRailGeometry
+      && (landscapeRailGeometry.verticalGap >= 16 || landscapeRailGeometry.horizontalGap >= 16),
+    `landscape joystick needs at least 16px clearance from mission rail: ${JSON.stringify(landscapeRailGeometry)}`);
     console.log('Pass 3 mobile layout, drawers, dialogs & abort mission OK!');
 
     assertErrorsClean(errors, 'Pass 3');

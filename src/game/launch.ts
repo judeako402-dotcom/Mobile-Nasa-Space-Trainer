@@ -68,6 +68,9 @@ class LaunchScene extends Phaser.Scene {
 
   create(): void {
     const { width, height } = this.scale;
+    const compactTouchUi = typeof window !== 'undefined'
+      && typeof window.matchMedia === 'function'
+      && window.matchMedia('(pointer: coarse)').matches;
     this.cameras.main.setBackgroundColor('#030711');
     const stars = this.add.graphics().setDepth(0);
     for (let index = 0; index < 180; index += 1) {
@@ -89,13 +92,15 @@ class LaunchScene extends Phaser.Scene {
     this.ship = this.add.image(width * 0.16, height * 0.68, 'mission-rocket')
       .setDisplaySize(54, 72).setDepth(3).setAngle(48);
 
-    const titleSize = Math.max(20, Math.min(34, width * 0.033));
+    const titleSize = compactTouchUi
+      ? Math.max(16, Math.min(25, width * 0.028))
+      : Math.max(20, Math.min(34, width * 0.033));
     this.caption = this.add.text(width / 2, height * 0.13, '', {
       color: '#fff2ce', fontFamily: 'Arial, sans-serif', fontSize: `${titleSize}px`,
       fontStyle: 'bold', align: 'center', letterSpacing: 3, stroke: '#09111b', strokeThickness: 5,
     }).setOrigin(0.5).setDepth(5);
-    this.subcaption = this.add.text(width / 2, height * 0.13 + 38, '', {
-      color: '#d3dfed', fontFamily: 'Arial, sans-serif', fontSize: '14px',
+    this.subcaption = this.add.text(width / 2, height * 0.13 + (compactTouchUi ? 30 : 38), '', {
+      color: '#d3dfed', fontFamily: 'Arial, sans-serif', fontSize: compactTouchUi ? '11px' : '14px',
       align: 'center', letterSpacing: 1, stroke: '#09111b', strokeThickness: 3,
     }).setOrigin(0.5).setDepth(5);
 
@@ -109,8 +114,10 @@ class LaunchScene extends Phaser.Scene {
     portrait.setScale(portraitScale);
     const suit = Phaser.Display.Color.IntegerToColor(getColor(this.callbacks.colorId).hex);
     const stamp = this.add.text(width / 2, height * 0.64, 'CLEARED FOR MOON', {
-      fontFamily: 'Arial, sans-serif', fontSize: '20px', color: '#ffffff',
-      backgroundColor: suit.rgba, padding: { x: 12, y: 9 }, fontStyle: 'bold',
+      fontFamily: 'Arial, sans-serif', fontSize: compactTouchUi ? '16px' : '20px', color: '#ffffff',
+      backgroundColor: suit.rgba,
+      padding: compactTouchUi ? { x: 8, y: 6 } : { x: 12, y: 9 },
+      fontStyle: 'bold',
     }).setOrigin(0.5).setDepth(5);
     this.showCaption('FLIGHT CHECK PASSED', 'Your suit is ready. Great job, Spudnaut!');
     const flightDelay = this.callbacks.reducedMotion ? 600 : 1300;

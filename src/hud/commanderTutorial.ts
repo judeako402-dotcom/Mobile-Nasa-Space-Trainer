@@ -47,7 +47,7 @@ const steps: TutorialStep[] = [
 
 const touchStep: TutorialStep = {
   id: 'touch', role: 'COMMANDER RUSSET', title: 'Walk on touch',
-  body: 'Drag the joystick to move. Tap the station floor to walk there, then tap USE at a nearby job. PEEK, RECENTER, and TOUR adjust your view.',
+  body: 'Drag the joystick to move. Floor taps are optional; enable Tap to move in Settings. Tap USE at a nearby job. PEEK, RECENTER, and TOUR adjust your view.',
   selector: '#touch-joystick', fallbackSelector: '.hud-top-left', preferredDock: 'top-right',
 };
 let activeSteps = steps;

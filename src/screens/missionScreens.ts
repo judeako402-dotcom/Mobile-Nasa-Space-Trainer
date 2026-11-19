@@ -89,7 +89,7 @@ function renderProjectedGaugesMarkup(): string {
           <img class="shift-gauge-icon" src="/assets/ui/spudnaut/icons/stat-${key}.svg" alt="" draggable="false" />
         </span>
         <div class="spud-stat-track shift-gauge-pill" aria-hidden="true">
-          <div class="spud-stat-fill shift-gauge-fill is-${key}" style="height:${after}%"></div>
+          <div class="spud-stat-fill shift-gauge-fill is-${key}" style="--projected-value:${after}%;height:${after}%"></div>
           <span class="shift-gauge-pct">${after}%</span>
         </div>
         <span class="shift-gauge-name">${label}</span>
@@ -178,7 +178,7 @@ function commitAssignments(): void {
     } else {
       startGameplayOst('ambient');
       showToast(touchControls.enabled
-        ? 'Shift started! Tap Tasks for a job, then drag to move or tap the floor to walk.'
+        ? 'Shift started! Tap Tasks for a job, then drag the joystick to move. Floor taps are optional in Settings.'
         : 'Shift started. Open Tasks to choose a job and follow its route.');
     }
   }
@@ -559,7 +559,7 @@ function showCommanderOnce(
 function beginBlackoutBriefing(): void {
   void fetchDonkiReports();
   const controls = touchControls.enabled
-    ? 'Drag the joystick or tap the station floor to walk to the Reactor Dome. When the power switch is highlighted, tap USE.'
+    ? 'Drag the joystick to reach the Reactor Dome. To walk by tapping the floor, enable Tap to move in Settings. When the switch is highlighted, tap USE.'
     : 'Use W, A, S, and D to walk. Find the power switch in the Reactor Dome and press E.';
   showCommanderOnce('landing', `Ready, ${session.save.name}? The Moon base lost power. ${controls}`);
 }
@@ -787,7 +787,7 @@ export function startPlanning(): void {
             </div>
           ` : `<small style="color:var(--spud-ink-muted);font-family:var(--mono);letter-spacing:0.12em;">${escapeHtml(event?.effect ?? 'An alert can come in after you pick your tasks.')}</small>`}
           ${event ? `
-            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;">
+            <div class="shift-planner-event-impact" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;">
               <span class="spud-constellation-kicker" style="margin:0;">APPLIED IMPACT</span>
               <div id="event-deltas" style="display:flex;flex-wrap:wrap;gap:8px 14px;" aria-live="polite">${metricChips(metricDeltas(eventBaseMetrics(), mission.metrics))}</div>
             </div>

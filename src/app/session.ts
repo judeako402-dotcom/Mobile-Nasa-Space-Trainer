@@ -14,6 +14,7 @@ import type { createStationGame, GameEvent, MapId, SceneGameState } from '../gam
 import { supportsHelmetArt } from '../game/assets/characterSprites';
 import { configureMusic, startMusic } from '../audio/music';
 import { configureSfx, setAmbient, setWalking } from '../sfx';
+import { touchControls } from '../game/systems/TouchControls';
 import { clearActiveModals } from '../ui/modalController';
 import {
   createInitialExam, createMissionState, createTrainingState,
@@ -489,6 +490,7 @@ export function applyOptions(): void {
     }
   }
   document.body.classList.toggle('reduce-motion', Boolean(save.options.reducedMotion));
+  touchControls.setTapToMoveEnabled(save.options.tapToMove);
   if (save.options.reducedMotion) {
     document.documentElement.style.setProperty('--parallax-x', '0');
     document.documentElement.style.setProperty('--parallax-y', '0');

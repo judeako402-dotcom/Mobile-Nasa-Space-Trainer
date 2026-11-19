@@ -363,16 +363,33 @@ describe('save options & showFps persistence', () => {
     expect(migrated.farm).toBe(84);
   });
 
-  it('defaults showFps and tutorialComplete to false and persists tutorialComplete when set', () => {
+  it('defaults showFps, tapToMove, and tutorialComplete to false and persists tutorialComplete when set', () => {
     expect(DEFAULT_OPTIONS.showFps).toBe(false);
+    expect(DEFAULT_OPTIONS.tapToMove).toBe(false);
     withMockStorage({}, () => {
       const fresh = loadSave();
       expect(fresh.options.showFps).toBe(false);
+      expect(fresh.options.tapToMove).toBe(false);
       expect(fresh.tutorialComplete).toBe(false);
       fresh.tutorialComplete = true;
       expect(persistSave(fresh)).toBe(true);
       expect(loadSave().tutorialComplete).toBe(true);
     });
+  });
+
+  it('restores tapToMove from saves and defaults it off for legacy saves', () => {
+    withMockStorage(
+      { [SAVE_KEY]: JSON.stringify({ options: { tapToMove: true } }) },
+      () => expect(loadSave().options.tapToMove).toBe(true),
+    );
+    withMockStorage(
+      { [SAVE_KEY]: JSON.stringify({ options: { tapToMove: false } }) },
+      () => expect(loadSave().options.tapToMove).toBe(false),
+    );
+    withMockStorage(
+      { [SAVE_KEY]: JSON.stringify({ options: {} }) },
+      () => expect(loadSave().options.tapToMove).toBe(false),
+    );
   });
 
   it('persists and restores showFps when true, false, or omitted', () => {

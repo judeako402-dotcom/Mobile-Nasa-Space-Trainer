@@ -4029,6 +4029,9 @@ body.reduce-motion .scene-loading-poster {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  z-index: 3;
   transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
 }
 

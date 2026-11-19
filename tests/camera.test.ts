@@ -3,6 +3,7 @@ import {
   CAMERA_FOLLOW_SPEED,
   CAMERA_MAX_STEP,
 } from '../src/game/constants';
+import { cameraZoomForViewport } from '../src/data/balance';
 import {
   CAMERA_SNAP_EPSILON,
   cameraTarget,
@@ -184,5 +185,18 @@ describe('clampCameraCenter', () => {
     const c = clampCameraCenter({ x: 640, y: 480 }, 1280, 720, bounds);
     expect(c.x).toBe(640);
     expect(c.y).toBe(480);
+  });
+});
+
+describe('cameraZoomForViewport', () => {
+  it('shows more of the station on touch-device viewports', () => {
+    expect(cameraZoomForViewport(800, true)).toBeCloseTo(800 / 1600, 6);
+    expect(cameraZoomForViewport(800, true)).toBeLessThan(cameraZoomForViewport(800));
+  });
+
+  it('preserves desktop framing and the minimum zoom', () => {
+    expect(cameraZoomForViewport(800)).toBeCloseTo(800 / 900, 6);
+    expect(cameraZoomForViewport(1280)).toBe(1);
+    expect(cameraZoomForViewport(320, true)).toBe(0.48);
   });
 });

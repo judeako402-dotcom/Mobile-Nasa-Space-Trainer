@@ -5,6 +5,7 @@ import {
   TouchControls,
   applyDeadzone,
   clampToUnit,
+  shouldAllowTapToMove,
   shouldUseTouchControls,
 } from '../src/game/systems/TouchControls';
 
@@ -22,6 +23,14 @@ describe('shouldUseTouchControls', () => {
 
   it('never enables controls on a device that reports no touch points', () => {
     expect(shouldUseTouchControls(true, 0)).toBe(false);
+  });
+});
+
+describe('shouldAllowTapToMove', () => {
+  it('keeps touch tap-to-move off by default while preserving desktop click-to-move', () => {
+    expect(shouldAllowTapToMove(true, false)).toBe(false);
+    expect(shouldAllowTapToMove(false, false)).toBe(true);
+    expect(shouldAllowTapToMove(true, true)).toBe(true);
   });
 });
 
@@ -79,6 +88,7 @@ describe('TouchControls action bridge', () => {
   it('reports disabled and inert until a device mounts the joystick', () => {
     const controls = new TouchControls();
     expect(controls.enabled).toBe(false);
+    expect(controls.canTapToMove()).toBe(true);
     expect(controls.getVector()).toEqual({ x: 0, y: 0 });
     controls.queueAction('snapCamera');
     expect(controls.drainActions()).toEqual(['snapCamera']);

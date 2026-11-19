@@ -35,6 +35,10 @@ export function shouldUseTouchControls(coarsePointer: boolean, maxTouchPoints: n
   return coarsePointer && maxTouchPoints > 0;
 }
 
+export function shouldAllowTapToMove(touchControlsEnabled: boolean, preferenceEnabled: boolean): boolean {
+  return !touchControlsEnabled || preferenceEnabled;
+}
+
 /** Runtime flavour of `shouldUseTouchControls`. */
 export function detectTouchControls(): boolean {
   if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
@@ -86,6 +90,7 @@ export class TouchControls {
   private origin = { x: 0, y: 0 };
   private vector = { x: 0, y: 0 };
   private peek = false;
+  private tapToMoveEnabled = false;
   private pending = new Set<TouchAction>();
 
   /** True once a touch-capable device has mounted the joystick. */
@@ -101,6 +106,14 @@ export class TouchControls {
   /** True while the on-screen PEEK button is held (Shift free-camera equivalent). */
   isPeeking(): boolean {
     return this.peek;
+  }
+
+  setTapToMoveEnabled(enabled: boolean): void {
+    this.tapToMoveEnabled = enabled;
+  }
+
+  canTapToMove(): boolean {
+    return shouldAllowTapToMove(this.enabled, this.tapToMoveEnabled);
   }
 
   /** Queue a one-frame action for `InputSystem` to consume. */
@@ -146,6 +159,7 @@ export class TouchControls {
     // again whenever the training deck takes over the scene shell.
     document.getElementById('camera-cluster')?.removeAttribute('hidden');
     document.body.dataset.touchControls = '1';
+    document.documentElement.classList.add('touch-ui-compact');
     return true;
   }
 
@@ -163,6 +177,7 @@ export class TouchControls {
       this.parts = null;
       document.getElementById('camera-cluster')?.setAttribute('hidden', '');
       delete document.body.dataset.touchControls;
+      document.documentElement.classList.remove('touch-ui-compact');
     }
     this.activePointer = null;
     this.vector = { x: 0, y: 0 };

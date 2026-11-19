@@ -84,7 +84,7 @@ export function createStationGame(
         },
       },
       scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH },
-      render: { antialias: true, roundPixels: false, powerPreference: 'high-performance' },
+      render: { antialias: true, antialiasGL: true, roundPixels: false, powerPreference: 'high-performance' },
       scene: [
         new BootScene(coordinator),
         new TrainingScene(coordinator),

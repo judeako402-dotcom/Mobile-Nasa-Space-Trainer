@@ -40,7 +40,7 @@ This builds the web app, syncs it into the Capacitor Android project, and assemb
 | Input | Action |
 | --- | --- |
 | WASD / arrow keys | Move |
-| Click or tap | Walk to a station or destination |
+| Click | Walk to a station or destination |
 | Virtual joystick (touch devices) | Drag to move |
 | E | Use a nearby assignment |
 | Training USE button | Use the highlighted training console |
@@ -51,7 +51,7 @@ This builds the web app, syncs it into the Capacitor Android project, and assemb
 | Esc | Close a task or panel |
 | PEEK / RECENTER / TOUR (touch devices) | Adjust the mission camera |
 
-On touch devices, tap the station floor to walk to a point, or tap a task to follow its route. Choose **INSTALL APP** from the main menu to install when the browser supports it; on iPhone or iPad, use Safari's **Share → Add to Home Screen** option. Visit the game online once before trying an offline cold start. The app shell and small static assets are cached, but large media may still require a network connection.
+On touch devices, the virtual joystick is enabled by default. To walk by tapping open floor, turn on **Tap to move on touch screens** in Settings; it is off by default. Selecting a task still follows its route. Choose **INSTALL APP** from the main menu to install when the browser supports it; on iPhone or iPad, use Safari's **Share → Add to Home Screen** option. Visit the game online once before trying an offline cold start. The app shell and small static assets are cached, but large media may still require a network connection.
 
 ## Space weather and EVA
 

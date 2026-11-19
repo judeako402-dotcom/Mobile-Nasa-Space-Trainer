@@ -126,7 +126,7 @@ export const TRAINING_DECK: MapDefinition = {
       id: 'rover', name: 'Rover', role: 'Scout', art: '/assets/potato-traveller.png',
       x: 1120, y: 380, facing: -1, accent: '#e9c27b',
       lines: [
-        'Try tapping the deck to walk. The autopilot follows the corridors.',
+        'Use the joystick to move. To tap the deck instead, enable Tap to move in Settings. The autopilot follows the corridors.',
         'Keep your suit sealed near the airlock. Habitats are polite until they are not.',
       ],
     },
