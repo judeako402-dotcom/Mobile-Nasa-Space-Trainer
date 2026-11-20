@@ -15,6 +15,28 @@ let ostMode: OstMode | null = null;
 let ostStep = 0;
 let ostDucked = false;
 
+type OstVoice = { oscillator: OscillatorNode; gain: GainNode; nodes: AudioNode[] };
+const ostVoices = new Set<OstVoice>();
+
+function trackOstVoice(oscillator: OscillatorNode, gain: GainNode, nodes: AudioNode[]): void {
+  const voice = { oscillator, gain, nodes };
+  ostVoices.add(voice);
+  oscillator.addEventListener('ended', () => {
+    ostVoices.delete(voice);
+    nodes.forEach((node) => node.disconnect());
+  });
+}
+
+function stopOstVoices(): void {
+  if (!ostCtx) return;
+  const now = ostCtx.currentTime;
+  for (const voice of ostVoices) {
+    voice.gain.gain.cancelScheduledValues(now);
+    voice.gain.gain.setTargetAtTime(0, now, 0.025);
+    voice.oscillator.stop(now + 0.08);
+  }
+}
+
 const AMBIENT_CHORDS = [
   [220, 277.18, 329.63, 440],
   [196, 246.94, 293.66, 392],
@@ -49,6 +71,7 @@ function scheduleOstStep(): void {
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(ostMaster);
+    trackOstVoice(osc, gain, [osc, filter, gain]);
     osc.start(now);
     osc.stop(now + 0.39);
     if (ostStep % 4 === 0) {
@@ -61,6 +84,7 @@ function scheduleOstStep(): void {
       pingGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
       ping.connect(pingGain);
       pingGain.connect(ostMaster);
+      trackOstVoice(ping, pingGain, [ping, pingGain]);
       ping.start(now);
       ping.stop(now + 0.28);
     }
@@ -80,6 +104,7 @@ function scheduleOstStep(): void {
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(ostMaster);
+    trackOstVoice(osc, gain, [osc, filter, gain]);
     osc.start(now);
     osc.stop(now + 1.2);
     if (ostStep % 4 === 0) {
@@ -92,6 +117,7 @@ function scheduleOstStep(): void {
       bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
       bass.connect(bassGain);
       bassGain.connect(ostMaster);
+      trackOstVoice(bass, bassGain, [bass, bassGain]);
       bass.start(now);
       bass.stop(now + 2.45);
     }
@@ -100,6 +126,7 @@ function scheduleOstStep(): void {
 }
 
 export function startGameplayOst(mode: OstMode = 'ambient'): void {
+  stopThemeImmediately();
   setAmbient(true);
   if (!enabled || typeof window === 'undefined' || !window.AudioContext) return;
   if (ostMode === mode && ostTimer) return;
@@ -118,6 +145,7 @@ export function startGameplayOst(mode: OstMode = 'ambient'): void {
     window.clearInterval(ostTimer);
     ostTimer = 0;
   }
+  if (ostMode !== mode) stopOstVoices();
   ostMode = mode;
   ostStep = 0;
   syncOstGain();
@@ -131,6 +159,7 @@ export function stopGameplayOst(): void {
     window.clearInterval(ostTimer);
     ostTimer = 0;
   }
+  stopOstVoices();
   syncOstGain();
 }
 
@@ -140,6 +169,14 @@ function cancelActiveFade(): void {
     cancelAnimationFrame(fadeRaf);
     fadeRaf = 0;
   }
+}
+
+function stopThemeImmediately(): void {
+  started = false;
+  cancelActiveFade();
+  if (!element) return;
+  element.volume = 0;
+  element.pause();
 }
 
 function ensureElement(): HTMLAudioElement | null {

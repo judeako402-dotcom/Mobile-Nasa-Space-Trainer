@@ -325,32 +325,32 @@ body[data-touch-controls] .habitat-choice:hover img {
   }
 
   body[data-touch-controls] .shift-planner .shift-planner-frame {
-    width: min(80vw, 740px);
-    height: min(84dvh, 520px);
+    width: min(96vw, 960px);
+    height: min(94dvh, 620px);
     min-height: 0;
-    max-height: calc(100dvh - 16px);
+    max-height: calc(100dvh - 12px);
     grid-template-rows: auto auto minmax(0, 1fr) auto;
-    gap: 2px;
-    padding: 8px;
+    gap: 5px;
+    padding: 10px;
     border-width: 5px;
     border-radius: 16px;
     overflow: hidden;
   }
 
   body[data-touch-controls] .shift-planner .spud-comic-heading.is-page {
-    font-size: clamp(18px, 2.1vw, 28px);
+    font-size: clamp(20px, 2.4vw, 30px);
   }
 
   body[data-touch-controls] .shift-planner-layout {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
   }
 
   body[data-touch-controls] .shift-planner .shift-planner-left-panel,
   body[data-touch-controls] .shift-planner .shift-planner-right-panel {
     min-height: 0;
-    gap: 6px;
-    padding: 7px;
+    gap: 7px;
+    padding: 9px;
   }
 
   body[data-touch-controls] .shift-planner .shift-planner-left-panel {
@@ -370,23 +370,23 @@ body[data-touch-controls] .habitat-choice:hover img {
   }
 
   body[data-touch-controls] .shift-planner .shift-offer {
-    grid-template-columns: 16px minmax(0, 1fr) 10px;
-    min-height: 44px;
-    gap: 4px;
-    padding: 2px 4px;
+    grid-template-columns: 20px minmax(0, 1fr) 12px;
+    min-height: 48px;
+    gap: 5px;
+    padding: 3px 5px;
   }
 
   body[data-touch-controls] .shift-planner .shift-offer > img {
     display: block;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
   }
 
   body[data-touch-controls] .shift-planner .shift-offer-info {
-    gap: 1px;
+    gap: 2px;
     min-width: 0;
-    font-size: 9px;
-    line-height: 1.15;
+    font-size: 11px;
+    line-height: 1.2;
   }
 
   body[data-touch-controls] .shift-planner .shift-offer-info strong {
@@ -398,7 +398,7 @@ body[data-touch-controls] .habitat-choice:hover img {
 
   body[data-touch-controls] .shift-planner .shift-offer-info small {
     overflow: hidden;
-    font-size: 7px;
+    font-size: 9px;
     line-height: 1.15;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -445,17 +445,13 @@ body[data-touch-controls] .habitat-choice:hover img {
   }
 
   body[data-touch-controls] .shift-planner .spud-planning-hazard-card #shift-event-title {
-    font-size: 11px;
+    font-size: 13px;
     margin: 1px 0;
   }
 
   body[data-touch-controls] .shift-planner .spud-planning-hazard-card .spud-copy-block p {
-    font-size: 10px;
-    line-height: 1.25;
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
+    font-size: 12px;
+    line-height: 1.35;
   }
 
   body[data-touch-controls] .shift-planner .spud-planning-hazard-card > .spud-constellation-kicker {
@@ -474,14 +470,16 @@ body[data-touch-controls] .habitat-choice:hover img {
   }
 
   body[data-touch-controls] .shift-planner .shift-planner-right-panel {
-    grid-template-rows: minmax(0, 0.85fr) auto minmax(0, 1.15fr);
-    gap: 4px;
+    grid-template-rows: minmax(0, 1.15fr) auto minmax(84px, 0.85fr);
+    gap: 5px;
+    overflow: hidden;
   }
 
   body[data-touch-controls] .shift-planner .shift-planner-right-panel > .spud-copy-block {
-    gap: 3px;
+    gap: 4px;
     min-height: 0;
-    overflow: auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   body[data-touch-controls] .shift-planner .shift-planner-preview-title {
@@ -491,8 +489,8 @@ body[data-touch-controls] .habitat-choice:hover img {
   }
 
   body[data-touch-controls] .shift-planner .shift-planner-preview-description {
-    font-size: 10px;
-    line-height: 1.25;
+    font-size: 12px;
+    line-height: 1.4;
   }
 
   body[data-touch-controls] .shift-planner .shift-planner-preview-effects {
@@ -509,7 +507,7 @@ body[data-touch-controls] .habitat-choice:hover img {
   }
 
   body[data-touch-controls] .shift-planner .shift-planner-gauges {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 3px;
   }
 
@@ -552,20 +550,20 @@ body[data-touch-controls] .habitat-choice:hover img {
   }
 
   body[data-touch-controls] .shift-planner .shift-gauge-pct {
-    font-size: 7px;
+    font-size: 8px;
   }
 
   body[data-touch-controls] .shift-planner .shift-gauge-name {
     grid-column: 2;
     grid-row: 2;
     justify-self: start;
-    font-size: 7px;
+    font-size: 8px;
   }
 
   body[data-touch-controls] .shift-planner .shift-gauge b {
     grid-column: 3;
     grid-row: 1 / span 2;
-    font-size: 7px;
+    font-size: 8px;
     white-space: nowrap;
   }
 

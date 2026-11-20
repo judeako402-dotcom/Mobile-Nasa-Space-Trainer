@@ -111,4 +111,32 @@ describe('music fade cancellation controller', () => {
     expect(music.musicState().started).toBe(false);
     expect(pauseCalls.length).toBeGreaterThan(pausesBeforeFlush);
   });
+
+  it('stops the menu soundtrack before starting the gameplay OST', async () => {
+    class FakeAudio {
+      paused = true;
+      volume = 0;
+      constructor(readonly src = '') {}
+      play() {
+        this.paused = false;
+        return Promise.resolve();
+      }
+      pause() {
+        this.paused = true;
+      }
+    }
+
+    vi.stubGlobal('Audio', FakeAudio);
+    vi.stubGlobal('window', {});
+
+    const music = await import('../src/audio/music');
+    music.configureMusic({ enabled: true, volume: 80 });
+    music.startMusic(0);
+    await Promise.resolve();
+    expect(music.musicState().paused).toBe(false);
+
+    music.startGameplayOst();
+
+    expect(music.musicState()).toMatchObject({ started: false, paused: true });
+  });
 });
