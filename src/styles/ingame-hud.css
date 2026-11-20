@@ -1876,8 +1876,13 @@ body.reduce-motion .disaster-card .disaster-tools button.is-targeted { animation
 }
 
 @media (min-width: 981px) {
+  .shift-planner-layout {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
   .shift-planner .shift-planner-right-panel > .spud-copy-block:first-child {
     grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
     overflow: hidden;
   }
 
