@@ -16,13 +16,6 @@ npm run build     # type-check and create dist/
 npm run preview   # serve the production build
 ```
 
-## Deploy to GitHub Pages
-
-The `main` branch workflow builds and deploys the game to
-`https://judeako402-dotcom.github.io/Mobile-Nasa-Space-Trainer/`. In the repository's
-**Settings → Pages**, set the build and deployment source to **GitHub Actions**.
-The deployment build prefixes game assets for the project-site path.
-
 ## Android debug APK (Capacitor)
 
 The Android app wraps the existing Vite/Phaser game; it does not change the game loop or add a native offline mode. NASA data and other network-backed features still require a connection. Browser-only PWA install/update prompts and service-worker registration are disabled inside the native app.
